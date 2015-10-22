@@ -25,6 +25,7 @@ router.get('/', function (req, res, next) {
 });
 
 router.post('/', function (req, res, next) {
+	if(req.user.isAdmin || req.user._id === req.body.author) {
 	Story.create(req.body)
 	.then(function (story) {
 		return story.populateAsync('author');
@@ -33,6 +34,9 @@ router.post('/', function (req, res, next) {
 		res.status(201).json(populated);
 	})
 	.then(null, next);
+} else {
+	res.status(401).send("not authorized")
+}
 });
 
 router.get('/:id', function (req, res, next) {
@@ -44,20 +48,28 @@ router.get('/:id', function (req, res, next) {
 });
 
 router.put('/:id', function (req, res, next) {
+	if(req.user.isAdmin || req.user._id === req.body.author) {
 	_.extend(req.story, req.body);
 	req.story.save()
 	.then(function (story) {
 		res.json(story);
 	})
 	.then(null, next);
+	} else {
+	res.status(401).send("not authorized")
+}
 });
 
 router.delete('/:id', function (req, res, next) {
+	if(req.user.isAdmin || req.user._id === req.body.author) {
 	req.story.remove()
 	.then(function () {
 		res.status(204).end();
 	})
 	.then(null, next);
+	} else {
+	res.status(401).send("not authorized")
+}
 });
 
 module.exports = router;
